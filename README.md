@@ -1,6 +1,6 @@
 # Lazarus.UnityAppIndicators
 
-This is the fix for Lazarus TTrayIcon on Unity:
+This is the fix for Lazarus TTrayIcon on Unity.
 
 To use git the code above and:
 
