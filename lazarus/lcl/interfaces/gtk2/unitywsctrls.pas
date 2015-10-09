@@ -1,5 +1,5 @@
 { Copyleft implementation of TTrayIcon for
-  Unity apllication indicators
+  Unity applications indicators
   Created 2015 by Anthony Walter sysrpl@gmail.com }
 
 unit UnityWSCtrls;
@@ -136,8 +136,8 @@ constructor TUnityTrayIconHandle.Create(TrayIcon: TCustomTrayIcon);
 var
   NewIcon: Pointer;
 begin
-	inherited Create;
-	FTrayIcon := TrayIcon;
+  inherited Create;
+  FTrayIcon := TrayIcon;
   FName := 'app-' + IntToHex(IntPtr(Application), SizeOf(IntPtr) * 2);
   NewIcon := Pointer(FTrayIcon.Icon.Handle);
   if NewIcon = nil then
@@ -159,7 +159,7 @@ begin
   { Only the first created AppIndicator is functional }
   if GlobalAppIndicator = nil then
     { It seems that icons can only come from files :( }
-  	GlobalAppIndicator := app_indicator_new_with_path(PChar(FName), PChar(FIconName),
+    GlobalAppIndicator := app_indicator_new_with_path(PChar(FName), PChar(FIconName),
       APP_INDICATOR_CATEGORY_APPLICATION_STATUS, IconThemePath);
   Update;
 end;
@@ -168,7 +168,7 @@ destructor TUnityTrayIconHandle.Destroy;
 begin
   { Hide the global AppIndicator }
   app_indicator_set_status(GlobalAppIndicator, APP_INDICATOR_STATUS_PASSIVE);
-	inherited Destroy;
+  inherited Destroy;
 end;
 
 procedure TUnityTrayIconHandle.Update;
