@@ -260,34 +260,30 @@ begin
   if Loaded then
     Exit(Initialized);
   Loaded:= True;
-  S := GetEnvironmentVariable('XDG_CURRENT_DESKTOP');
-  if (S = 'Unity') or (S = 'KDE') then
-  begin
-    Module := LoadLibrary(libappindicator);
-    if Module = 0 then
-      Exit;
-    Result :=
-      TryLoad('app_indicator_get_type', @app_indicator_get_type) and
-      TryLoad('app_indicator_new', @app_indicator_new) and
-      TryLoad('app_indicator_new_with_path', @app_indicator_new_with_path) and
-      TryLoad('app_indicator_set_status', @app_indicator_set_status) and
-      TryLoad('app_indicator_set_attention_icon', @app_indicator_set_attention_icon) and
-      TryLoad('app_indicator_set_menu', @app_indicator_set_menu) and
-      TryLoad('app_indicator_set_icon', @app_indicator_set_icon) and
-      TryLoad('app_indicator_set_label', @app_indicator_set_label) and
-      TryLoad('app_indicator_set_icon_theme_path', @app_indicator_set_icon_theme_path) and
-      TryLoad('app_indicator_set_ordering_index', @app_indicator_set_ordering_index) and
-      TryLoad('app_indicator_get_id', @app_indicator_get_id) and
-      TryLoad('app_indicator_get_category', @app_indicator_get_category) and
-      TryLoad('app_indicator_get_status', @app_indicator_get_status) and
-      TryLoad('app_indicator_get_icon', @app_indicator_get_icon) and
-      TryLoad('app_indicator_get_icon_theme_path', @app_indicator_get_icon_theme_path) and
-      TryLoad('app_indicator_get_attention_icon', @app_indicator_get_attention_icon) and
-      TryLoad('app_indicator_get_menu', @app_indicator_get_menu) and
-      TryLoad('app_indicator_get_label', @app_indicator_get_label) and
-      TryLoad('app_indicator_get_label_guide', @app_indicator_get_label_guide) and
-      TryLoad('app_indicator_get_ordering_index', @app_indicator_get_ordering_index);
-  end;
+  Module := LoadLibrary(libappindicator);
+  if Module = 0 then
+    Exit;
+  Result :=
+    TryLoad('app_indicator_get_type', @app_indicator_get_type) and
+    TryLoad('app_indicator_new', @app_indicator_new) and
+    TryLoad('app_indicator_new_with_path', @app_indicator_new_with_path) and
+    TryLoad('app_indicator_set_status', @app_indicator_set_status) and
+    TryLoad('app_indicator_set_attention_icon', @app_indicator_set_attention_icon) and
+    TryLoad('app_indicator_set_menu', @app_indicator_set_menu) and
+    TryLoad('app_indicator_set_icon', @app_indicator_set_icon) and
+    TryLoad('app_indicator_set_label', @app_indicator_set_label) and
+    TryLoad('app_indicator_set_icon_theme_path', @app_indicator_set_icon_theme_path) and
+    TryLoad('app_indicator_set_ordering_index', @app_indicator_set_ordering_index) and
+    TryLoad('app_indicator_get_id', @app_indicator_get_id) and
+    TryLoad('app_indicator_get_category', @app_indicator_get_category) and
+    TryLoad('app_indicator_get_status', @app_indicator_get_status) and
+    TryLoad('app_indicator_get_icon', @app_indicator_get_icon) and
+    TryLoad('app_indicator_get_icon_theme_path', @app_indicator_get_icon_theme_path) and
+    TryLoad('app_indicator_get_attention_icon', @app_indicator_get_attention_icon) and
+    TryLoad('app_indicator_get_menu', @app_indicator_get_menu) and
+    TryLoad('app_indicator_get_label', @app_indicator_get_label) and
+    TryLoad('app_indicator_get_label_guide', @app_indicator_get_label_guide) and
+    TryLoad('app_indicator_get_ordering_index', @app_indicator_get_ordering_index);
   Initialized := Result;
 end;
 
