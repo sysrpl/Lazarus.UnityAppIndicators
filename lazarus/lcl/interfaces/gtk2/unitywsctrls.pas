@@ -8,9 +8,9 @@ interface
 
 {$mode delphi}
 uses
-  GLib2, Gtk2, Gdk2, Gdk2Pixbuf,
-  Classes, SysUtils, Graphics,
-  Controls, Forms, ExtCtrls, WSExtCtrls, LCLType;
+  GLib2, Gtk2, Gdk2Pixbuf,
+  Classes, SysUtils, dynlibs,
+  Graphics, Controls, Forms, ExtCtrls, WSExtCtrls, LCLType, LazUTF8;
 
 { TUnityWSCustomTrayIcon is the class for tray icons on systems
   running the Unity desktop environment.
@@ -39,7 +39,7 @@ type
     class function Hide(const ATrayIcon: TCustomTrayIcon): Boolean; override;
     class function Show(const ATrayIcon: TCustomTrayIcon): Boolean; override;
     class procedure InternalUpdate(const ATrayIcon: TCustomTrayIcon); override;
-    class function GetPosition(const ATrayIcon: TCustomTrayIcon): TPoint; override;
+    class function GetPosition(const {%H-}ATrayIcon: TCustomTrayIcon): TPoint; override;
   end;
 
 { UnityAppIndicatorInit returns true if appindicator libraries can be loaded }
@@ -51,14 +51,14 @@ implementation
 const
   libappindicator = 'libappindicator.so.1';
 
-const
+{const
   APP_INDICATOR_SIGNAL_NEW_ICON = 'new-icon';
   APP_INDICATOR_SIGNAL_NEW_ATTENTION_ICON = 'new-attention-icon';
   APP_INDICATOR_SIGNAL_NEW_STATUS = 'new-status';
   APP_INDICATOR_SIGNAL_NEW_LABEL = 'new-label';
   APP_INDICATOR_SIGNAL_CONNECTION_CHANGED = 'connection-changed';
   APP_INDICATOR_SIGNAL_NEW_ICON_THEME_PATH = 'new-icon-theme-path';
-
+}
 type
   TAppIndicatorCategory = (
     APP_INDICATOR_CATEGORY_APPLICATION_STATUS,
@@ -137,23 +137,23 @@ begin
   inherited Create;
   FTrayIcon := TrayIcon;
   FName := 'app-' + IntToHex(IntPtr(Application), SizeOf(IntPtr) * 2);
-  NewIcon := Pointer(FTrayIcon.Icon.Handle);
+  NewIcon := {%H-}Pointer(FTrayIcon.Icon.Handle);
   if NewIcon = nil then
-    NewIcon := Pointer(Application.Icon.Handle);
+    NewIcon := {%H-}Pointer(Application.Icon.Handle);
   if NewIcon <> GlobalIcon then
   begin
     GlobalIcon := NewIcon;
     ForceDirectories(IconThemePath);
-    FIconName := FName + '-' + IntToHex(IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
+    FIconName := FName + '-' + IntToHex({%H-}IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
     if FileExists(GlobalIconPath) then
       DeleteFile(GlobalIconPath);
     GlobalIconPath := IconThemePath + FIconName + '.' + IconType;
-    gdk_pixbuf_save(GlobalIcon, PChar(GlobalIconPath), IconType, nil);
+    gdk_pixbuf_save(GlobalIcon, PChar(GlobalIconPath), IconType, nil, [nil]);
     if GlobalAppIndicator <> nil then
       app_indicator_set_icon(GlobalAppIndicator, PChar(FIconName));
   end
   else
-    FIconName := FName + '-' + IntToHex(IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
+    FIconName := FName + '-' + IntToHex({%H-}IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
   { Only the first created AppIndicator is functional }
   if GlobalAppIndicator = nil then
     { It seems that icons can only come from files :( }
@@ -173,24 +173,24 @@ procedure TUnityTrayIconHandle.Update;
 var
   NewIcon: Pointer;
 begin
-  NewIcon := Pointer(FTrayIcon.Icon.Handle);
+  NewIcon := {%H-}Pointer(FTrayIcon.Icon.Handle);
   if NewIcon = nil then
-    NewIcon := Pointer(Application.Icon.Handle);
+    NewIcon := {%H-}Pointer(Application.Icon.Handle);
   if NewIcon <> GlobalIcon then
   begin
     GlobalIcon := NewIcon;
-    FIconName := FName + '-' + IntToHex(IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
+    FIconName := FName + '-' + IntToHex({%H-}IntPtr(GlobalIcon), SizeOf(GlobalIcon) * 2);
     ForceDirectories(IconThemePath);
     if FileExists(GlobalIconPath) then
       DeleteFile(GlobalIconPath);
     GlobalIconPath := IconThemePath + FIconName + '.' + IconType;
-    gdk_pixbuf_save(GlobalIcon, PChar(GlobalIconPath), IconType, nil);
+    gdk_pixbuf_save(GlobalIcon, PChar(GlobalIconPath), IconType, nil, [nil]);
     { Again it seems that icons can only come from files }
     app_indicator_set_icon(GlobalAppIndicator, PChar(FIconName));
   end;
   { It seems to me you can only set the menu once for an AppIndicator }
   if (app_indicator_get_menu(GlobalAppIndicator) = nil) and (FTrayIcon.PopUpMenu <> nil) then
-    app_indicator_set_menu(GlobalAppIndicator, PGtkMenu(FTrayIcon.PopUpMenu.Handle));
+    app_indicator_set_menu(GlobalAppIndicator, {%H-}PGtkMenu(FTrayIcon.PopUpMenu.Handle));
   app_indicator_set_status(GlobalAppIndicator, APP_INDICATOR_STATUS_ACTIVE);
 end;
 
@@ -253,13 +253,18 @@ var
     Result := Proc <> nil;
   end;
 
-var
-  S: string;
 begin
   Result := False;
   if Loaded then
     Exit(Initialized);
   Loaded:= True;
+  if GetEnvironmentVariableUTF8('XDG_CURRENT_DESKTOP') <> 'ubuntu:GNOME' then
+  begin
+    Initialized := False;
+    Exit;
+  end;
+  if Initialized then
+    Exit(True);
   Module := LoadLibrary(libappindicator);
   if Module = 0 then
     Exit;
